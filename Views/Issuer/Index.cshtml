@@ -1,0 +1,175 @@
+@model List<UDI_SSW_Prototype.Models.Citizen>
+@{
+    Layout = "~/Views/Shared/_IssuerLayout.cshtml";
+    ViewData["Title"] = "Issuer Dashboard";
+    var registries = ViewBag.Registries as List<UDI_SSW_Prototype.Models.KeyRegistry> ?? new List<UDI_SSW_Prototype.Models.KeyRegistry>();
+}
+
+<div class="row">
+    <!-- Issue Credential Panel -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-file-earmark-plus me-2"></i>Issue Signed Credential
+            </div>
+            <div class="card-body">
+                <form asp-action="IssueCredential" method="post" enctype="multipart/form-data">
+                    @if (!Model.Any())
+                    {
+                        <div class="alert alert-warning py-2 small mb-3">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i> No wallet profiles enrolled yet. Citizens must create a profile from the home page first.
+                        </div>
+                    }
+                    @if (!registries.Any())
+                    {
+                        <div class="alert alert-danger py-2 small mb-3">
+                            <i class="bi bi-shield-exclamation me-1"></i> No active key registries found. Setup a key registry in the 'Registries & Keys' tab.
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label class="form-label small font-weight-bold">Select Citizen (Subject DID)</label>
+                        <select name="citizenDid" class="form-select" required @(Model.Any() ? "" : "disabled")>
+                            @if (Model.Any())
+                            {
+                                <option value="">-- Choose Citizen --</option>
+                                @foreach (var citizen in Model)
+                                {
+                                    <option value="@citizen.Did">@citizen.Name (@citizen.Did.Substring(0, Math.Min(15, citizen.Did.Length))...)</option>
+                                }
+                            }
+                            else
+                            {
+                                <option value="">-- No Citizens Enrolled --</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small font-weight-bold">Select Active Issuer Key Registry</label>
+                        <select name="issuerName" class="form-select" required @(registries.Any() ? "" : "disabled")>
+                            @if (registries.Any())
+                            {
+                                <option value="">-- Choose Registry --</option>
+                                @foreach (var registry in registries)
+                                {
+                                    <option value="@registry.IssuerName">@registry.IssuerName</option>
+                                }
+                            }
+                            else
+                            {
+                                <option value="">-- No Active Registries --</option>
+                            }
+                        </select>
+                        <div class="form-text small opacity-75">Only active registries with valid signing keys are shown.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small font-weight-bold">Credential Claim Name</label>
+                        <select name="claimName" class="form-select" required id="claimSelect">
+                            <option value="Driving License">Driving License</option>
+                            <option value="Age Verification">Age Verification</option>
+                            <option value="National Identity Proof">National Identity Proof</option>
+                            <option value="General Document Upload">General Document Upload</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small font-weight-bold">Claim Value</label>
+                        <input type="text" name="claimValue" class="form-control" placeholder="e.g. DL-40294029 or Over 18" required />
+                    </div>
+
+                    <!-- PDF File Upload (Max 1MB) -->
+                    <div class="mb-4" id="uploadGroup">
+                        <label class="form-label small font-weight-bold">Upload Supporting Verification Document (PDF Only, Max 1MB)</label>
+                        <input type="file" name="documentFile" class="form-control" accept=".pdf" />
+                        <div class="form-text small text-muted">Required for general uploads. Optional for driving licenses.</div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary font-weight-bold py-2 shadow-sm">
+                            <i class="bi bi-file-earmark-check me-2"></i>Sign & Issue Credential
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Citizens Registry Panel -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white">
+                <i class="bi bi-people me-2"></i>Registered Citizens
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>DID (Subject Identifier)</th>
+                                <th>Driver License</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.Any())
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted small">No citizens enrolled in the system yet.</td>
+                                </tr>
+                            }
+                            @foreach (var citizen in Model)
+                            {
+                                <tr>
+                                    <td class="font-weight-bold text-dark">@citizen.Name</td>
+                                    <td><code class="small badge-did">@citizen.Did</code></td>
+                                    <td>
+                                        @if (string.IsNullOrEmpty(citizen.LicenseNumber))
+                                        {
+                                            <span class="text-muted small">Not provided</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary font-monospace">@citizen.LicenseNumber</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (citizen.IsActive)
+                                        {
+                                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Deactivated</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <form asp-action="ToggleCitizenActive" method="post" class="d-inline">
+                                            <input type="hidden" name="did" value="@citizen.Did" />
+                                            <input type="hidden" name="isActive" value="@(citizen.IsActive ? "false" : "true")" />
+                                            @if (citizen.IsActive)
+                                            {
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-dash-circle"></i> Deactivate
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit" class="btn btn-outline-success btn-sm">
+                                                    <i class="bi bi-plus-circle"></i> Activate
+                                                </button>
+                                            }
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

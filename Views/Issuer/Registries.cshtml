@@ -1,0 +1,101 @@
+@model List<UDI_SSW_Prototype.Models.KeyRegistry>
+@{
+    Layout = "~/Views/Shared/_IssuerLayout.cshtml";
+    ViewData["Title"] = "Key Registries & Cryptographic Vault";
+}
+
+<div class="row">
+    <!-- Register New Authority Panel -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-shield-plus me-2"></i>Create New Registry
+            </div>
+            <div class="card-body">
+                <form asp-action="CreateRegistry" method="post">
+                    <p class="small text-muted mb-4">
+                        Creating a new registry automatically generates a unique RSA-2048 signing key-pair to represent a specific government branch or validation authority.
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label small font-weight-bold">Authority / Issuer Name</label>
+                        <input type="text" name="issuerName" class="form-control" placeholder="e.g. StateRoadTransportOffice" required />
+                        <div class="form-text small text-muted">Use alphanumeric names without spaces (e.g. GovIdentityOffice).</div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary font-weight-bold py-2 shadow-sm">
+                            <i class="bi bi-key-fill me-2"></i>Generate Key-Pair & Register
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Vault List Panel -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white">
+                <i class="bi bi-safe2 me-2"></i>Cryptographic Vault & Public Keys
+            </div>
+            <div class="card-body p-0">
+                <div class="accordion accordion-flush" id="keysAccordion">
+                    @if (!Model.Any())
+                    {
+                        <div class="p-4 text-center text-muted small">No active registries found.</div>
+                    }
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        var key = Model[i];
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading-@i">
+                                <button class="accordion-button collapsed font-weight-bold text-dark d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@i" aria-expanded="false" aria-controls="collapse-@i">
+                                    <div class="d-flex align-items-center gap-3 w-100">
+                                        <span>🏦 @key.IssuerName</span>
+                                        @if (key.IsActive)
+                                        {
+                                            <span class="badge bg-success small py-1 px-2"><i class="bi bi-shield-check me-1"></i>Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger small py-1 px-2"><i class="bi bi-shield-slash me-1"></i>Inactive</span>
+                                        }
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="collapse-@i" class="accordion-collapse collapse" aria-labelledby="heading-@i" data-bs-parent="#keysAccordion">
+                                <div class="accordion-body bg-light">
+                                    <div class="mb-3 text-end">
+                                        <form asp-action="ToggleRegistryStatus" method="post" class="d-inline">
+                                            <input type="hidden" name="issuerName" value="@key.IssuerName" />
+                                            <input type="hidden" name="isActive" value="@(key.IsActive ? "false" : "true")" />
+                                            @if (key.IsActive)
+                                            {
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-slash-circle me-1"></i>Deactivate Registry
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit" class="btn btn-outline-success btn-sm">
+                                                    <i class="bi bi-check-circle me-1"></i>Activate Registry
+                                                </button>
+                                            }
+                                        </form>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small font-weight-bold">Public Key PEM (Shareable with Verifiers)</label>
+                                        <div class="pem-block">@key.PublicKeyPem</div>
+                                    </div>
+                                    <div>
+                                        <label class="form-label small font-weight-bold text-danger">Private Key PEM (Secured in Vault)</label>
+                                        <div class="pem-block border border-danger">@key.PrivateKeyPem</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

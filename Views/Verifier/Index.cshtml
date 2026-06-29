@@ -1,0 +1,136 @@
+@{
+    Layout = "~/Views/Shared/_VerifierLayout.cshtml";
+    ViewData["Title"] = "Verification Center";
+    var candidate = ViewBag.Candidate as UDI_SSW_Prototype.Models.Citizen;
+    var licenseCred = ViewBag.LicenseCredential as UDI_SSW_Prototype.Models.VerifiableCredential;
+    var searchLicenseNumber = ViewBag.SearchLicenseNumber as string;
+}
+
+<div class="row">
+    <!-- Driver's License Search Panel -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-success text-white">
+                <i class="bi bi-search me-2"></i>Search Driving License
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-4">
+                    Enter the driver's license number provided by the citizen to lookup their profile and access their verifiable credential.
+                </p>
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger py-2 small">
+                        @ViewBag.Error
+                    </div>
+                }
+
+                <form asp-action="Search" method="post">
+                    <div class="mb-3">
+                        <label class="form-label small font-weight-bold text-muted">Driver's License Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                            <input type="text" name="licenseNumber" class="form-control" placeholder="e.g. DL-40294029" value="@searchLicenseNumber" required />
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success font-weight-bold py-2 shadow-sm">
+                            <i class="bi bi-search me-2"></i>Lookup Candidate
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Candidate Verification Panel -->
+    <div class="col-lg-7">
+        @if (candidate != null)
+        {
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-dark text-white">
+                    <i class="bi bi-person-badge me-2"></i>Candidate Profile Mapped
+                </div>
+                <div class="card-body bg-light">
+                    <div class="row">
+                        <div class="col-sm-6 mb-3">
+                            <span class="small text-muted d-block">Full Name</span>
+                            <strong class="text-dark" style="font-size: 1.1rem;">@candidate.Name</strong>
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <span class="small text-muted d-block">License Number</span>
+                            <strong class="text-dark">@candidate.LicenseNumber</strong>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <span class="small text-muted d-block">Subject DID</span>
+                            <code class="small badge-did text-break">@candidate.Did</code>
+                        </div>
+                    </div>
+
+                    <hr/>
+
+                    @if (licenseCred == null)
+                    {
+                        <div class="alert alert-warning py-2 small">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>No verifiable driving license credential has been issued to this citizen yet.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mb-4">
+                            <h6 class="font-weight-bold text-dark mb-2">Verifiable Credential Payload:</h6>
+                            <div class="pem-block mb-3">@licenseCred.SignedPayload</div>
+                        </div>
+
+                        <form asp-action="Verify" method="post">
+                            <input type="hidden" name="credentialId" value="@licenseCred.Id" />
+                            <input type="hidden" name="searchLicenseNumber" value="@searchLicenseNumber" />
+                            <button type="submit" class="btn btn-primary btn-lg w-100 font-weight-bold shadow-sm">
+                                <i class="bi bi-patch-check-fill me-2"></i>Run Cryptographic Offline Verification
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Verification Results View -->
+        @if (ViewBag.VerificationSuccess != null)
+        {
+            var isSuccess = (bool)ViewBag.VerificationSuccess;
+            <div class="card shadow-sm border-0">
+                <div class="card-header @(isSuccess ? "bg-success" : "bg-danger") text-white">
+                    <i class="bi @(isSuccess ? "bi-check-circle-fill" : "bi-x-circle-fill") me-2"></i>Verification Results
+                </div>
+                <div class="card-body">
+                    <div class="p-3 rounded mb-3 @(isSuccess ? "bg-success bg-opacity-10 text-success border border-success" : "bg-danger bg-opacity-10 text-danger border border-danger")">
+                        <strong>@ViewBag.VerificationResult</strong>
+                    </div>
+
+                    @if (isSuccess)
+                    {
+                        <div class="row g-2 small text-muted">
+                            <div class="col-sm-6">
+                                <strong>Subject DID:</strong> <code class="small text-dark">@ViewBag.SubjectDid</code>
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>Government Issuer:</strong> <span class="text-dark font-weight-bold">@ViewBag.IssuerName</span>
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>Claim Field:</strong> <span class="text-dark">@ViewBag.ClaimName</span>
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>Claim Value:</strong> <span class="text-dark font-monospace">@ViewBag.ClaimValue</span>
+                            </div>
+                            <div class="col-12 mt-2 border-top pt-2">
+                                <div class="text-success font-weight-bold">
+                                    <i class="bi bi-shield-shaded me-1"></i> @ViewBag.PiiStatus
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,74 @@
+@{
+    ViewData["Title"] = "Create Citizen Wallet Profile";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8">
+        <div class="card shadow border-0">
+            <div class="card-header bg-info text-white text-center py-3">
+                <h4 class="mb-0 font-weight-bold"><i class="bi bi-wallet2 me-2"></i>Self-Sovereign Identity Wallet Creation</h4>
+            </div>
+            <div class="card-body p-4 bg-light">
+                <p class="small text-muted text-center mb-4">
+                    Complete this form to enroll and generate your unique public/private key-pair locally. Your keys are held inside your wallet profile and never shared directly.
+                </p>
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger py-2 small">
+                        @ViewBag.Error
+                    </div>
+                }
+
+                <form asp-action="CreateProfile" method="post">
+                    <div class="row">
+                        <!-- Left Column: Personal Information -->
+                        <div class="col-md-6 border-end pe-4">
+                            <h5 class="font-weight-bold text-dark mb-3">1. Personal Details</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label small font-weight-bold text-muted">Full Name</label>
+                                <input type="text" name="name" class="form-control" placeholder="e.g. Sagar Sen" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small font-weight-bold text-muted">Birthdate</label>
+                                <input type="date" name="birthdate" class="form-control" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small font-weight-bold text-muted">Driver's License Number</label>
+                                <input type="text" name="licenseNumber" class="form-control" placeholder="e.g. DL-40294029" required />
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Wallet Credentials -->
+                        <div class="col-md-6 ps-4">
+                            <h5 class="font-weight-bold text-dark mb-3">2. Login Credentials</h5>
+
+                            <div class="mb-3">
+                                <label class="form-label small font-weight-bold text-muted">Choose Username</label>
+                                <input type="text" name="username" class="form-control" placeholder="e.g. sagar_wallet" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small font-weight-bold text-muted">Choose Password</label>
+                                <input type="password" name="password" class="form-control" placeholder="Enter secure password" required />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-info btn-lg font-weight-bold py-2 shadow-sm text-white">
+                            <i class="bi bi-key-fill me-2"></i>Generate Keys & Create Wallet
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center bg-white border-0 py-3">
+                <span class="text-muted small">Already have a wallet?</span> 
+                <a asp-controller="Auth" asp-action="Login" asp-route-role="Citizen" class="text-info font-weight-bold text-decoration-none">Sign In Here</a>
+            </div>
+        </div>
+    </div>
+</div>

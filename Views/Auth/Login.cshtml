@@ -1,0 +1,127 @@
+@{
+    ViewData["Title"] = "Sign In";
+    var roleType = ViewBag.RoleType as string ?? "Issuer";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-10">
+        <div class="card shadow-lg border-0" style="overflow: hidden; border-radius: 10px;">
+            <div class="row g-0">
+                <!-- Left Column: Overview and Role Description -->
+                <div class="col-md-6 p-5 text-white" style="background: linear-gradient(135deg, #1a252f 0%, #2c3e50 100%);">
+                    @if (roleType == "Issuer")
+                    {
+                        <h3 class="mb-4">🏦 Government Issuer Portal</h3>
+                        <p class="mb-3 lead">Welcome to the Government Identity Authority system.</p>
+                        <p class="small opacity-75">
+                            As an <strong>Issuer</strong>, your role is to perform offline identity verification of citizens and cryptographically sign their credentials (claims).
+                        </p>
+                        <ul class="small opacity-75 list-unstyled mt-4">
+                            <li class="mb-2"><i class="bi bi-shield-check me-2"></i> Register baseline citizen profiles in the state database.</li>
+                            <li class="mb-2"><i class="bi bi-key me-2"></i> Manage public/private key-pairs for different government departments.</li>
+                            <li class="mb-2"><i class="bi bi-file-earmark-lock me-2"></i> Issue and cryptographically sign Verifiable Credentials (VCs).</li>
+                        </ul>
+                        <div class="mt-5 p-3 rounded bg-white bg-opacity-10 small">
+                            <strong>Demo Credentials:</strong><br/>
+                            Username: <code>gov_issuer</code><br/>
+                            Password: <code>Password@123</code>
+                        </div>
+                    }
+                    else if (roleType == "Citizen")
+                    {
+                        <h3 class="mb-4">📱 Citizen Digital Wallet</h3>
+                        <p class="mb-3 lead">Access your Secure Self-Sovereign Wallet.</p>
+                        <p class="small opacity-75">
+                            As a <strong>Citizen</strong>, your wallet is kept locally to secure your public/private key-pairs, store issued credentials, and selectively share claims (like "Over 18") with verifiers without exposing raw PII.
+                        </p>
+                        <ul class="small opacity-75 list-unstyled mt-4">
+                            <li class="mb-2"><i class="bi bi-folder2-open me-2"></i> View your issued claims in a clean, local dashboard.</li>
+                            <li class="mb-2"><i class="bi bi-qr-code me-2"></i> Generate Verifiable Presentations (VPs) for shops/banks.</li>
+                            <li class="mb-2"><i class="bi bi-file-pdf me-2"></i> View uploaded physical verification documents securely.</li>
+                        </ul>
+                        <div class="mt-5 p-3 rounded bg-white bg-opacity-10 small">
+                            <strong>Note:</strong> If you don't have a wallet created yet, click the registration link on the right to generate your DID and secure keys.
+                        </div>
+                    }
+                    else if (roleType == "Verifier")
+                    {
+                        <h3 class="mb-4">🛡️ Third-Party Verifier Portal</h3>
+                        <p class="mb-3 lead">Establish trust securely with zero-trust validation.</p>
+                        <p class="small opacity-75">
+                            As a <strong>Verifier</strong>, you request and check cryptographic proofs from citizens. You verify the digital signatures offline against the government's public registry, securing validation with zero PII exposure.
+                        </p>
+                        <ul class="small opacity-75 list-unstyled mt-4">
+                            <li class="mb-2"><i class="bi bi-search me-2"></i> Search and verify candidate credentials by Driver's License number.</li>
+                            <li class="mb-2"><i class="bi bi-check2-all me-2"></i> Verify cryptographically signed claim payloads locally.</li>
+                            <li class="mb-2"><i class="bi bi-incognito me-2"></i> Enforce high privacy standards by keeping customer database clean of raw PII.</li>
+                        </ul>
+                        <div class="mt-5 p-3 rounded bg-white bg-opacity-10 small">
+                            <strong>Demo Credentials:</strong><br/>
+                            Username: <code>verifier_user</code><br/>
+                            Password: <code>Password@123</code>
+                        </div>
+                    }
+                </div>
+
+                <!-- Right Column: Login Fields -->
+                <div class="col-md-6 p-5 bg-white d-flex flex-column justify-content-center">
+                    <h3 class="mb-3 text-dark font-weight-bold">Sign In</h3>
+                    <p class="text-muted small mb-4">Please enter your credentials below to access your workspace.</p>
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger py-2 small">
+                            @ViewBag.Error
+                        </div>
+                    }
+
+                    <form asp-controller="Auth" asp-action="Login" method="post">
+                        <input type="hidden" name="roleType" value="@roleType" />
+                        <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+                        <div class="mb-3">
+                            <label class="form-label small font-weight-bold text-muted">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" name="username" class="form-control" placeholder="Enter username" required />
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small font-weight-bold text-muted">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input type="password" name="password" class="form-control" placeholder="Enter password" required />
+                            </div>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg font-weight-bold py-2 shadow-sm" style="font-size: 0.95rem;">
+                                @if (roleType == "Issuer")
+                                {
+                                    <span>Access Issuer Portal</span>
+                                }
+                                else if (roleType == "Citizen")
+                                {
+                                    <span>Access Citizen Wallet</span>
+                                }
+                                else
+                                {
+                                    <span>Access Verifier Portal</span>
+                                }
+                            </button>
+                        </div>
+                    </form>
+
+                    @if (roleType == "Citizen")
+                    {
+                        <div class="text-center mt-3 small">
+                            <span class="text-muted">Don't have a wallet yet?</span> 
+                            <a asp-controller="Wallet" asp-action="CreateProfile" class="text-info font-weight-bold text-decoration-none">Create Wallet Profile</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

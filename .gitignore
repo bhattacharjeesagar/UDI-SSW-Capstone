@@ -1,0 +1,18 @@
+# Compilation outputs
+bin/
+obj/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Local database files
+*.mdf
+*.ldf
+
+# Uploaded Citizen verification files (PDFs)
+wwwroot/uploads/*
+!wwwroot/uploads/.gitkeep

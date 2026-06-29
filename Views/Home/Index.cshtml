@@ -1,0 +1,183 @@
+@{
+    ViewData["Title"] = "Application Overview";
+}
+
+<div class="row align-items-stretch mt-4">
+    <!-- Left Section: Professional Project Overview & Key Features -->
+    <div class="col-lg-7">
+        <div class="card p-4 shadow-sm border-0 h-100">
+            <h2 class="text-primary font-weight-bold mb-3"><i class="bi bi-cpu-fill me-2"></i>Unified Citizen Identity & Self-Sovereign Wallet</h2>
+            <p class="text-muted lead mb-4" style="font-size: 1.05rem; line-height: 1.6;">
+                The UDI-SSW Capstone Portal provides an architecture that shifts identity management from centralized databases to a decentralized, user-centric model. Under this self-sovereign paradigm, citizens own and control their digital credentials, sharing only cryptographic proofs rather than raw personal details.
+            </p>
+
+            <h5 class="font-weight-bold text-dark mb-3"><i class="bi bi-gear-wide-connected me-2"></i>Key Implementation Features</h5>
+            
+            <div class="row g-3">
+                <!-- Issuer Column -->
+                <div class="col-md-6">
+                    <div class="p-3 border rounded h-100 bg-light">
+                        <h6 class="font-weight-bold text-primary"><i class="bi bi-bank me-2"></i>Issuer (Government Vault)</h6>
+                        <p class="small text-muted mb-0">
+                            Department keys are locked in a secure cryptographic vault. Strict administrative authorization protocols protect credential-signing keys from unauthorized access.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Holder Column -->
+                <div class="col-md-6">
+                    <div class="p-3 border rounded h-100 bg-light">
+                        <h6 class="font-weight-bold text-info"><i class="bi bi-phone me-2"></i>Holder (Local Wallet)</h6>
+                        <p class="small text-muted mb-0">
+                            Credentials and key-pairs reside locally in the citizen's wallet. This local storage architecture minimizes central storage requirements and prevents single-point-of-failure risks.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Verifier Column -->
+                <div class="col-md-6">
+                    <div class="p-3 border rounded h-100 bg-light">
+                        <h6 class="font-weight-bold text-success"><i class="bi bi-shield-check me-2"></i>Verifier (Offline Trust)</h6>
+                        <p class="small text-muted mb-0">
+                            Third-party verifiers validate credentials offline using the Issuer's public key registry. There is zero database tracking of citizen verification requests.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Transparency and Life Cycle -->
+                <div class="col-md-6">
+                    <div class="p-3 border rounded h-100 bg-light">
+                        <h6 class="font-weight-bold text-warning"><i class="bi bi-hourglass-split me-2"></i>Inactivity & Data Policy</h6>
+                        <p class="small text-muted mb-0">
+                            To ensure high security, citizen profiles or credentials left unused for extended periods are automatically deactivated, requiring administrative reactivation.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Section: Interactive SSW Workflow Animation -->
+    <div class="col-lg-5">
+        <div class="card p-4 shadow-sm border-0 h-100 bg-dark text-white d-flex flex-column justify-content-between">
+            <div>
+                <h4 class="font-weight-bold text-warning mb-2"><i class="bi bi-play-circle-fill me-2"></i>SSW Workflow Lifecycle</h4>
+                <p class="small text-muted mb-4">An interactive, live visualization of the registration, issuance, and verification stages.</p>
+                
+                <!-- Visual Map Container -->
+                <div class="position-relative border rounded p-4 mb-4 text-center bg-black bg-opacity-25" style="height: 280px; overflow: hidden;">
+                    
+                    <!-- Nodes -->
+                    <div class="row justify-content-between align-items-center h-100">
+                        <!-- Govt Issuer Node -->
+                        <div class="col-4">
+                            <div class="node-box border border-primary p-2 rounded" id="nodeIssuer">
+                                <i class="bi bi-bank" style="font-size: 1.8rem; color: #007bff;"></i>
+                                <div class="small font-weight-bold mt-1 text-primary">Govt Issuer</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mobile Wallet Node -->
+                        <div class="col-4">
+                            <div class="node-box border border-info p-2 rounded" id="nodeWallet">
+                                <i class="bi bi-phone" style="font-size: 1.8rem; color: #17a2b8;"></i>
+                                <div class="small font-weight-bold mt-1 text-info">Citizen Wallet</div>
+                            </div>
+                        </div>
+
+                        <!-- Verifier Node -->
+                        <div class="col-4">
+                            <div class="node-box border border-success p-2 rounded" id="nodeVerifier">
+                                <i class="bi bi-shop" style="font-size: 1.8rem; color: #28a745;"></i>
+                                <div class="small font-weight-bold mt-1 text-success">Shop / Bank</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Traveling Token (Animated) -->
+                    <div id="animToken" class="position-absolute rounded-circle bg-warning d-flex align-items-center justify-content-center" 
+                         style="width: 24px; height: 24px; top: 50%; left: 15%; margin-top: -12px; transition: all 1s ease-in-out; display: none;">
+                        <i class="bi bi-key-fill text-dark" style="font-size: 0.75rem;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Step Details -->
+            <div class="p-3 border border-secondary rounded bg-secondary bg-opacity-25">
+                <h6 class="font-weight-bold text-warning" id="stepTitle">Step 1: Offline Enrollment</h6>
+                <p class="small text-white mb-0" id="stepDescription">
+                    Citizen provides baseline details and registers with the Government Issuer Office, establishing their foundational profile.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const token = document.getElementById("animToken");
+            const stepTitle = document.getElementById("stepTitle");
+            const stepDesc = document.getElementById("stepDescription");
+            
+            const issuer = document.getElementById("nodeIssuer");
+            const wallet = document.getElementById("nodeWallet");
+            const verifier = document.getElementById("nodeVerifier");
+
+            // Animation sequence settings
+            const steps = [
+                {
+                    title: "Step 1: Offline Enrollment & Registry Setup",
+                    desc: "The citizen registers their identity with the Government Issuer. The Government secures their profile in the central vault and prepares credential metadata.",
+                    x: "15%",
+                    activeNode: "issuer"
+                },
+                {
+                    title: "Step 2: Cryptographic Issuance & Local Key Transfer",
+                    desc: "The Government signs the credential using its secure private key. The signed credential and verification keys are pushed directly into the Citizen's local mobile wallet.",
+                    x: "50%",
+                    activeNode: "wallet"
+                },
+                {
+                    title: "Step 3: Verification & Zero-Knowledge Claim Check",
+                    desc: "Citizen presents the key-signed credential to the Verifier (Shop/Bank). The Verifier confirms validity offline using the Public Registry without accessing personal raw data.",
+                    x: "85%",
+                    activeNode: "verifier"
+                }
+            ];
+
+            let currentStep = 0;
+
+            function runCycle() {
+                const step = steps[currentStep];
+                
+                // Update text
+                stepTitle.innerText = step.title;
+                stepDesc.innerText = step.desc;
+
+                // Move token
+                token.style.display = "flex";
+                token.style.left = step.x;
+
+                // Highlight active node
+                issuer.classList.remove("bg-white", "bg-opacity-10");
+                wallet.classList.remove("bg-white", "bg-opacity-10");
+                verifier.classList.remove("bg-white", "bg-opacity-10");
+
+                if (step.activeNode === "issuer") {
+                    issuer.classList.add("bg-white", "bg-opacity-10");
+                } else if (step.activeNode === "wallet") {
+                    wallet.classList.add("bg-white", "bg-opacity-10");
+                } else if (step.activeNode === "verifier") {
+                    verifier.classList.add("bg-white", "bg-opacity-10");
+                }
+
+                currentStep = (currentStep + 1) % steps.length;
+            }
+
+            // Start looping
+            runCycle();
+            setInterval(runCycle, 4000);
+        });
+    </script>
+}
