@@ -13,8 +13,11 @@ public class HomeController : Controller
         _logger = logger;
     }
 
+    public static string? DbInitError { get; set; }
+
     public IActionResult Index()
     {
+        ViewBag.DbInitError = DbInitError;
         return View();
     }
 

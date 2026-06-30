@@ -2,6 +2,15 @@
     ViewData["Title"] = "Application Overview";
 }
 
+@if (ViewBag.DbInitError != null)
+{
+    <div class="alert alert-danger my-3 p-3 shadow-sm rounded col-12">
+        <h5 class="alert-heading font-weight-bold"><i class="bi bi-exclamation-octagon-fill me-2"></i>Database Connection Error Detected</h5>
+        <p class="mb-2">The application started, but failed to connect to the Azure SQL Database. Below is the exact exception message to help debug:</p>
+        <pre class="bg-dark text-white p-3 rounded mb-0" style="font-size: 0.85rem; max-height: 300px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;">@ViewBag.DbInitError</pre>
+    </div>
+}
+
 <div class="row align-items-stretch mt-4">
     <!-- Left Section: Professional Project Overview & Key Features -->
     <div class="col-lg-7">
