@@ -16,3 +16,7 @@ obj/
 # Uploaded Citizen verification files (PDFs)
 wwwroot/uploads/*
 !wwwroot/uploads/.gitkeep
+
+# Exclude SQL Setup Script
+DatabaseSetup.sql
+
